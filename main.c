@@ -15,17 +15,15 @@
 // User definitions:
 //
 // seconds of current values below the threshold to turn on alarm
-#define seconds_to_alarm 20
-//(2*24*60*60)
+#define seconds_to_alarm (2*24*60*60)
 // seconds of current values over the threshold to clear current monitor counter
-#define seconds_of_current_measure 7
+#define seconds_of_current_measure 4
 // seconds without values of enable input above the threshold to disable current monitor counter
-#define seconds_of_inactivity_to_disable_alarm 10
-// (24*60*60)
+#define seconds_of_inactivity_to_disable_alarm (24*60*60)
 // threshold of enable input: ~ 1/8 Ucc=5V in ADC steps
 #define enable_input_analog_threshold 256
 // current transformer ratio in mV/A
-#define current_transformet_ratio 100
+#define current_transformet_ratio 90
 // RMS current threshold in mA
 #define rms_current_alarm_threshold 3000L
 // End of user definitions
