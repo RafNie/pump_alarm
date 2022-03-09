@@ -13,4 +13,7 @@ A photoresistor can be bridged if the alarm device should be always active.
 #### Hardware
 Digispark clone with ATTinny85
 
-The device was mounted on a universal board attached to the digispark pins. I will try to draw a diagram soon.
+The device was mounted on a universal board attached to the digispark pins.
+
+
+<img src="schema.png" width="510">
