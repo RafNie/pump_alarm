@@ -251,6 +251,12 @@ uint16_t getEnableInputADCValue() {
 	return ADC;
 }
 
+void acousticSignalOfCurrentMonitoringDisabled() {
+	if (heartBeatCounter % 2) {
+		beep();
+	}
+}
+
 void procesEnableInput() {
 	uint16_t enableVal = getEnableInputADCValue();
 	if (enableVal > enable_input_analog_threshold) {
@@ -259,6 +265,7 @@ void procesEnableInput() {
 	}
 	if (enableMonitorCounter == 0) {
 		enableState = current_monitoring_disabled;
+		acousticSignalOfCurrentMonitoringDisabled();
 	}
 }
 
@@ -284,7 +291,7 @@ void configureIO() {
 	// ADC current transformer: PB2
 	// ADC enable monitor: PB4
 	ADMUX |= (_BV(REFS1) | _BV(REFS2)); //Uref 2,56V without C
-	ADCSRA |= (_BV(ADEN) | _BV(ADPS0)) | _BV(ADPS1)); // enable ADC and prescaler 8
+	ADCSRA |= (_BV(ADEN) | _BV(ADPS0) | _BV(ADPS1)); // enable ADC and prescaler 8
 	// conversion time 13,5 ADCclk cycles
 
 	// Alarm reset button: Din pullup
