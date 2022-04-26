@@ -1,5 +1,6 @@
 /*
- * main.c
+ * 	Pump station alarm
+ * 	ATTiny85
  *
  *  Created on: 11 sty 2022
  *      Author: Rafał Niedźwiedziński
@@ -9,16 +10,15 @@
 #include <stdlib.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <avr/wdt.h>
+#include <avr/eeprom.h>
 #include <assert.h>
 
 // User definitions:
-//
-// Time to activate alarm when the current values are below the threshold [seconds]
+// Time to activate an alarm when the current values are below the threshold [seconds]
 #define seconds_to_alarm (2L*24*60*60)
-// Time to clear current monitor counter by the current values over the threshold [seconds]
+// Time to clear a current monitor counter by the current values over the threshold [seconds]
 #define seconds_of_current_measure 4
-// Time to disable current monitor counter without values of the enable input above the threshold [seconds]
+// Time of values of the enable input below the threshold to disable a current monitor counter [seconds]
 #define seconds_of_inactivity_to_disable_alarm (24L*60*60)
 // threshold of enable input: ~ 1/8 Ucc=5V in ADC steps
 #define enable_input_analog_threshold 256
@@ -26,7 +26,6 @@
 #define current_transformet_ratio 98
 // RMS current threshold in mA
 #define rms_current_alarm_threshold 3000
-//
 // End of user definitions
 
 // Pins definitions
@@ -36,29 +35,28 @@
 #define ENABLE_MONITOR_ADC (_BV(MUX1))
 
 #if seconds_of_inactivity_to_disable_alarm >= seconds_to_alarm
-#error seconds_of_inactivity_to_disable_alarm should be less than seconds_to_alarm
+#error Error of time definitions: seconds_of_inactivity_to_disable_alarm should be less than seconds_to_alarm
 #endif
 
+// Don't edit:
 // ADC constants
 #define fixed_point_precision 1000
 #define root_squere_of_two 1414L
 #define adc_steps 1024
 #define adc_Vref 2560
-// Don't edit, calculations:
 // Alarm threshold calculation (fixed point)
-// >>>>
 #define max_current_threshold ((rms_current_alarm_threshold*root_squere_of_two)/fixed_point_precision)
 #define voltage_threshold ((max_current_threshold*current_transformet_ratio)/fixed_point_precision)
 #define current_threshold ((adc_steps*voltage_threshold)/adc_Vref)
-// <<<<
 // ADC steps per 1A RMS
-// >>>>
 #define mV_per_A (((1*root_squere_of_two)*current_transformet_ratio)/fixed_point_precision)
-#define steps_per_ampere ((adc_steps*85L)/adc_Vref)
-// <<<<
+#define steps_per_ampere ((adc_steps*mV_per_A)/adc_Vref) //todo check it
+//
 
 #define heart_beat_period 20
 #define samples_number 198
+
+#define eeprom_addr_safe_power_off (0x00)
 
 typedef enum {
 	alarm,
@@ -78,6 +76,14 @@ typedef enum {
 	true = 1
 } Bool;
 
+typedef enum {
+	rising_edge,
+	falling_edge,
+	stable_high,
+	stable_low
+} PinChangeState;
+
+Bool lastResetPinState = true;
 CurrentMonitoring enableState = current_monitoring_enabled; // switched by the ADC enable input
 volatile States state = no_alarm;
 volatile uint32_t currentMonitorCounter = seconds_to_alarm;
@@ -86,7 +92,7 @@ volatile uint16_t currentMonitorBuffer[samples_number];
 volatile uint8_t currentMonitorBufferIndex = samples_number;
 volatile uint8_t heartBeatCounter = heart_beat_period;
 uint8_t measurementsAboveThresholdCounter = seconds_of_current_measure;
-Bool currentPresentationFeature = false;
+Bool currentPresentationFeatureIsEnable = false;
 
 void checkeEnableOfCurrentPresentationFeatureAtStartup();
 void presentCurrentLevelIfNeed(uint16_t currentValue);
@@ -100,8 +106,12 @@ void procesEnableInput();
 void processCurrentMeasurement();
 void checkCurrentValue();
 void checkAlarmConditions();
-void precessHeartBeat();
+void processHeartBeat();
+Bool isResetPinPressed();
 void beep();
+void safePowerOff();
+void checkSafePowerOff();
+void procesUnsafePowerOff();
 
 int main(void) {
 
@@ -110,13 +120,11 @@ int main(void) {
 
 	configureIO();
 	checkeEnableOfCurrentPresentationFeatureAtStartup();
-	//enable watchdog
+	checkSafePowerOff();
 
-	beep();
-	_delay_ms(100);
-	beep();
-	if (currentPresentationFeature) {
-		_delay_ms(100); beep();
+	beep(); _delay_ms(150); beep();
+	if (currentPresentationFeatureIsEnable) {
+		_delay_ms(150); beep();
 	}
 
 	configureTimer();
@@ -139,26 +147,69 @@ int main(void) {
 		case no_alarm:
 			break;
 		}
-		precessHeartBeat();
+		safePowerOff();
+		processHeartBeat();
 	};
 	return 0;
 }
 
-inline uint8_t isResetPinPressed() {
-	return (PINB & _BV(ALARM_RESET)) ? 0 : 1;
+inline Bool isResetPinPressed() {
+	return (PINB & _BV(ALARM_RESET)) ? false : true;
+}
+
+inline PinChangeState getPinChangeState() {
+	Bool presentResetPinState = isResetPinPressed();
+	PinChangeState state = stable_low;
+	if (lastResetPinState == true && presentResetPinState == false) {
+		state = falling_edge;
+	} else if (lastResetPinState == false && presentResetPinState == true) {
+		state = rising_edge;
+	}else if (lastResetPinState == true && presentResetPinState == true) {
+		state = stable_high;
+	}
+	lastResetPinState = presentResetPinState;
+	return state;
+}
+
+void safePowerOff() {
+	switch (getPinChangeState()) {
+	case rising_edge:
+		eeprom_busy_wait();
+		eeprom_write_byte(eeprom_addr_safe_power_off, true);
+		break;
+	case falling_edge:
+		eeprom_busy_wait();
+		eeprom_write_byte(eeprom_addr_safe_power_off, false);
+		break;
+	default:
+		break;
+	}
+}
+
+void checkSafePowerOff() {
+	if (false == eeprom_read_byte(eeprom_addr_safe_power_off)) {
+		procesUnsafePowerOff();
+	}
+}
+
+void procesUnsafePowerOff() {
+	while (!isResetPinPressed()) {
+		beep();
+		_delay_ms(500);
+	}
 }
 
 void checkeEnableOfCurrentPresentationFeatureAtStartup() {
 	if (isResetPinPressed()) {
-			_delay_ms(300);
-			if (isResetPinPressed()) {
-				currentPresentationFeature = true;
-			}
+		_delay_ms(300);
+		if (isResetPinPressed()) {
+			currentPresentationFeatureIsEnable = true;
 		}
+	}
 }
 
 void presentCurrentLevelIfNeed(uint16_t currentValue) {
-	if (currentPresentationFeature) {
+	if (currentPresentationFeatureIsEnable) {
 		uint8_t ampere = currentValue/steps_per_ampere;
 		for (uint8_t i=0; i<ampere; i++) {
 			beep(); _delay_ms(100);
@@ -173,7 +224,7 @@ void beep() {
 	PORTB &= ~_BV(BUZZ);
 }
 
-void precessHeartBeat() {
+void processHeartBeat() {
 	if (heartBeatCounter == 0) {
 		if (state != alarm)
 			beep();
@@ -236,7 +287,7 @@ void processCurrentMeasurement() {
 	_delay_ms(2);
 
 	sei();
-	ADCSRA |= _BV(ADIE) | _BV(ADATE);// ADC interrupt enable, start in free running mode
+	ADCSRA |= _BV(ADIE) | _BV(ADATE); // ADC interrupt enable, start in free running mode
 	ADCSRA |= _BV(ADSC);
 	state = current_measuring;
 }
@@ -277,7 +328,6 @@ void precessResetAlarm() {
 			enableMonitorCounter = seconds_of_inactivity_to_disable_alarm;
 			state = no_alarm;
 			PORTB &= ~_BV(BUZZ);
-			// or reset MCU
 		}
 	}
 }
@@ -332,8 +382,4 @@ ISR(ADC_vect) {
 		state = checking_alarm_conditions;
 	}
 }
-
-
-
-
 
