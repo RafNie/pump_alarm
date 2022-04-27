@@ -50,13 +50,14 @@
 #define current_threshold ((adc_steps*voltage_threshold)/adc_Vref)
 // ADC steps per 1A RMS
 #define mV_per_A (((1*root_squere_of_two)*current_transformet_ratio)/fixed_point_precision)
-#define steps_per_ampere ((adc_steps*mV_per_A)/adc_Vref) //todo check it
+#define steps_per_ampere ((adc_steps*mV_per_A)/adc_Vref)
 //
 
 #define heart_beat_period 20
 #define samples_number 198
 
-#define eeprom_addr_safe_power_off (0x00)
+#define eeprom_addr_enable_safe_power_off ((uint8_t*)0x10)
+#define eeprom_addr_safe_power_off ((uint8_t*)0x00)
 
 typedef enum {
 	alarm,
@@ -83,6 +84,7 @@ typedef enum {
 	stable_low
 } PinChangeState;
 
+Bool enableSafePoweroOff = true;
 Bool lastResetPinState = true;
 CurrentMonitoring enableState = current_monitoring_enabled; // switched by the ADC enable input
 volatile States state = no_alarm;
@@ -102,7 +104,7 @@ void configureTimer();
 void configureIO();
 void precessAlarm();
 void precessResetAlarm();
-void procesEnableInput();
+void processEnableInput();
 void processCurrentMeasurement();
 void checkCurrentValue();
 void checkAlarmConditions();
@@ -111,7 +113,8 @@ Bool isResetPinPressed();
 void beep();
 void safePowerOff();
 void checkSafePowerOff();
-void procesUnsafePowerOff();
+void processUnsafePowerOff();
+void processSwitchingActivationOfSafePowerOff();
 
 int main(void) {
 
@@ -120,12 +123,13 @@ int main(void) {
 
 	configureIO();
 	checkeEnableOfCurrentPresentationFeatureAtStartup();
-	checkSafePowerOff();
-
 	beep(); _delay_ms(150); beep();
 	if (currentPresentationFeatureIsEnable) {
 		_delay_ms(150); beep();
 	}
+
+	processSwitchingActivationOfSafePowerOff();
+	checkSafePowerOff();
 
 	configureTimer();
 
@@ -136,7 +140,7 @@ int main(void) {
 			precessResetAlarm();
 			break;
 		case start_current_measuring:
-			procesEnableInput();
+			processEnableInput();
 			processCurrentMeasurement();
 			break;
 		case current_measuring:
@@ -171,28 +175,50 @@ inline PinChangeState getPinChangeState() {
 	return state;
 }
 
+void _delay_s(uint16_t sec)
+{
+	sec *= 100;
+	for (uint16_t i=0; i<sec; i++)
+	{
+		_delay_ms(10);
+	}
+}
+
+void processSwitchingActivationOfSafePowerOff() {
+	enableSafePoweroOff = eeprom_read_byte(eeprom_addr_enable_safe_power_off);
+	_delay_s(2);
+	if (isResetPinPressed()) {
+		eeprom_write_byte(eeprom_addr_enable_safe_power_off, !enableSafePoweroOff);
+		enableSafePoweroOff = !enableSafePoweroOff;
+		beep(); _delay_ms(150);
+		if (enableSafePoweroOff) {
+			_delay_ms(150); beep();
+		}
+	}
+}
+
 void safePowerOff() {
-	switch (getPinChangeState()) {
-	case rising_edge:
-		eeprom_busy_wait();
-		eeprom_write_byte(eeprom_addr_safe_power_off, true);
-		break;
-	case falling_edge:
-		eeprom_busy_wait();
-		eeprom_write_byte(eeprom_addr_safe_power_off, false);
-		break;
-	default:
-		break;
+	if (enableSafePoweroOff) {
+		switch (getPinChangeState()) {
+		case rising_edge:
+			eeprom_write_byte(eeprom_addr_safe_power_off, true);
+			break;
+		case falling_edge:
+			eeprom_write_byte(eeprom_addr_safe_power_off, false);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
 void checkSafePowerOff() {
-	if (false == eeprom_read_byte(eeprom_addr_safe_power_off)) {
-		procesUnsafePowerOff();
+	if (enableSafePoweroOff && (false == eeprom_read_byte(eeprom_addr_safe_power_off))) {
+		processUnsafePowerOff();
 	}
 }
 
-void procesUnsafePowerOff() {
+void processUnsafePowerOff() {
 	while (!isResetPinPressed()) {
 		beep();
 		_delay_ms(500);
@@ -308,7 +334,7 @@ void acousticSignalOfCurrentMonitoringDisabled() {
 	}
 }
 
-void procesEnableInput() {
+void processEnableInput() {
 	uint16_t enableVal = getEnableInputADCValue();
 	if (enableVal > enable_input_analog_threshold) {
 		enableMonitorCounter = seconds_of_inactivity_to_disable_alarm;
