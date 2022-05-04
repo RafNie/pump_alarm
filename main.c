@@ -132,7 +132,6 @@ int main(void) {
 	checkSafePowerOff();
 
 	configureTimer();
-
 	while (1) {
 		switch(state) {
 		case alarm:
@@ -309,7 +308,8 @@ void processCurrentMeasurement() {
 		state = no_alarm;
 		return;
 	}
-	ADMUX = CURRENT_TRANSFORMER_ADC;
+	ADMUX &= ~ENABLE_MONITOR_ADC;
+	ADMUX |= CURRENT_TRANSFORMER_ADC;
 	_delay_ms(2);
 
 	sei();
@@ -319,7 +319,8 @@ void processCurrentMeasurement() {
 }
 
 uint16_t getEnableInputADCValue() {
-	ADMUX = ENABLE_MONITOR_ADC;
+	ADMUX &= ~CURRENT_TRANSFORMER_ADC;
+	ADMUX |= ENABLE_MONITOR_ADC;
 	_delay_ms(2);
 	ADCSRA |= _BV(ADSC); // Start conversion - first conversion may be not to accurate
 	while (ADCSRA & _BV(ADSC)){} // wait for conversion
