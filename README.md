@@ -19,10 +19,20 @@ To enable this featire hold pressed a reset button during 2s just after the acou
 
 - Heart beat - acoustic signalisation of normal working of the device. A beep is emitted every 20s.
 
+#### User manual (Polish)
+
+Instrukcja obslugi w jezyku polskim jest w [pliku pdf](Alarm_pompy.pdf).
+
 #### Hardware
-Digispark clone with ATTinny85
 
-The device was mounted on a universal board attached to the digispark pins.
+Digispark clone with ATTinny85. Programming via USB with use [micronucleus](https://github.com/micronucleus/micronucleus).
 
+KiCad schema is in [this file](connections.sch), so you can design  PCB if you want .
 
 <img src="schema.png" width="510">
+
+The prototype was mounted on a universal board attached to the digispark pins.  
+
+<img src="prototype.jpg" width="320">  
+
+<img src="prototype2.jpg" width="320">

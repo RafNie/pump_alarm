@@ -1,0 +1,360 @@
+EESchema Schematic File Version 4
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:Conn_01x03_Female J1
+U 1 1 6228F22E
+P 1200 1200
+F 0 "J1" H 1094 875 50  0000 C CNN
+F 1 "Power Connector" H 1094 966 50  0000 C CNN
+F 2 "" H 1200 1200 50  0001 C CNN
+F 3 "~" H 1200 1200 50  0001 C CNN
+	1    1200 1200
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+VDC #PWR01
+U 1 1 6228F95A
+P 1800 1000
+F 0 "#PWR01" H 1800 900 50  0001 C CNN
+F 1 "+VDC" H 1800 1275 50  0000 C CNN
+F 2 "" H 1800 1000 50  0001 C CNN
+F 3 "" H 1800 1000 50  0001 C CNN
+	1    1800 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR02
+U 1 1 6228F9BE
+P 1850 1400
+F 0 "#PWR02" H 1850 1150 50  0001 C CNN
+F 1 "GND" H 1855 1227 50  0000 C CNN
+F 2 "" H 1850 1400 50  0001 C CNN
+F 3 "" H 1850 1400 50  0001 C CNN
+	1    1850 1400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x06_Female J2
+U 1 1 6228FB2C
+P 1200 2700
+F 0 "J2" H 1094 2175 50  0000 C CNN
+F 1 "GPIO Connector" H 1094 2266 50  0000 C CNN
+F 2 "" H 1200 2700 50  0001 C CNN
+F 3 "~" H 1200 2700 50  0001 C CNN
+	1    1200 2700
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+5V #PWR03
+U 1 1 6228FC67
+P 2100 1000
+F 0 "#PWR03" H 2100 850 50  0001 C CNN
+F 1 "+5V" H 2115 1173 50  0000 C CNN
+F 2 "" H 2100 1000 50  0001 C CNN
+F 3 "" H 2100 1000 50  0001 C CNN
+	1    2100 1000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1400 1100 1800 1100
+Wire Wire Line
+	1800 1100 1800 1000
+Wire Wire Line
+	1400 1300 2100 1300
+Wire Wire Line
+	2100 1300 2100 1000
+Wire Wire Line
+	1400 1200 1850 1200
+Wire Wire Line
+	1850 1200 1850 1400
+Wire Wire Line
+	1750 2400 1400 2400
+Wire Wire Line
+	1750 2500 1400 2500
+Wire Wire Line
+	1750 2600 1400 2600
+Wire Wire Line
+	1750 2700 1400 2700
+Wire Wire Line
+	1750 2800 1400 2800
+Wire Wire Line
+	1750 2900 1400 2900
+Text Label 1550 2900 0    50   ~ 0
+P0
+Text Label 1550 2800 0    50   ~ 0
+P1
+Text Label 1550 2700 0    50   ~ 0
+P2
+Text Label 1550 2600 0    50   ~ 0
+P3
+Text Label 1550 2500 0    50   ~ 0
+P4
+Text Label 1550 2400 0    50   ~ 0
+P5
+$Comp
+L Transistor_BJT:BC550 Q1
+U 1 1 62290058
+P 3700 1600
+F 0 "Q1" H 3891 1646 50  0000 L CNN
+F 1 "BC550" H 3891 1555 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 3900 1525 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/BC/BC547.pdf" H 3700 1600 50  0001 L CNN
+	1    3700 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 622900F5
+P 3100 1600
+F 0 "R3" V 2893 1600 50  0000 C CNN
+F 1 "10k" V 2984 1600 50  0000 C CNN
+F 2 "" V 3030 1600 50  0001 C CNN
+F 3 "~" H 3100 1600 50  0001 C CNN
+	1    3100 1600
+	0    1    1    0   
+$EndComp
+$Comp
+L Diode:1N4007 D1
+U 1 1 622902CB
+P 3400 1150
+F 0 "D1" V 3354 1229 50  0000 L CNN
+F 1 "1N4007" V 3445 1229 50  0000 L CNN
+F 2 "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal" H 3400 975 50  0001 C CNN
+F 3 "http://www.vishay.com/docs/88503/1n4001.pdf" H 3400 1150 50  0001 C CNN
+	1    3400 1150
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:Buzzer BZ1
+U 1 1 622903E0
+P 4100 1100
+F 0 "BZ1" H 4253 1129 50  0000 L CNN
+F 1 "Buzzer" H 4253 1038 50  0000 L CNN
+F 2 "" V 4075 1200 50  0001 C CNN
+F 3 "~" V 4075 1200 50  0001 C CNN
+	1    4100 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR06
+U 1 1 62290467
+P 3800 800
+F 0 "#PWR06" H 3800 650 50  0001 C CNN
+F 1 "+5V" H 3815 973 50  0000 C CNN
+F 2 "" H 3800 800 50  0001 C CNN
+F 3 "" H 3800 800 50  0001 C CNN
+	1    3800 800 
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR07
+U 1 1 622905D4
+P 3800 1900
+F 0 "#PWR07" H 3800 1650 50  0001 C CNN
+F 1 "GND" H 3805 1727 50  0000 C CNN
+F 2 "" H 3800 1900 50  0001 C CNN
+F 3 "" H 3800 1900 50  0001 C CNN
+	1    3800 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3400 1300 3800 1300
+Wire Wire Line
+	4000 1300 4000 1200
+Wire Wire Line
+	3400 1000 3400 900 
+Wire Wire Line
+	3400 900  3800 900 
+Wire Wire Line
+	4000 900  4000 1000
+Wire Wire Line
+	3800 900  3800 800 
+Connection ~ 3800 900 
+Wire Wire Line
+	3800 900  4000 900 
+Connection ~ 3800 1300
+Wire Wire Line
+	3800 1300 4000 1300
+Wire Wire Line
+	3800 1800 3800 1900
+Wire Wire Line
+	3500 1600 3250 1600
+Wire Wire Line
+	2600 1600 2950 1600
+Text Label 2700 1600 0    50   ~ 0
+P1
+Wire Wire Line
+	3800 1300 3800 1400
+$Comp
+L power:+5V #PWR04
+U 1 1 6229145D
+P 2900 2100
+F 0 "#PWR04" H 2900 1950 50  0001 C CNN
+F 1 "+5V" H 2915 2273 50  0000 C CNN
+F 2 "" H 2900 2100 50  0001 C CNN
+F 3 "" H 2900 2100 50  0001 C CNN
+	1    2900 2100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_PHOTO R1
+U 1 1 6229152A
+P 2900 2350
+F 0 "R1" H 2970 2396 50  0000 L CNN
+F 1 "R_PHOTO" H 2970 2305 50  0000 L CNN
+F 2 "" V 2950 2100 50  0001 L CNN
+F 3 "~" H 2900 2300 50  0001 C CNN
+	1    2900 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 6229159C
+P 2900 2750
+F 0 "R2" H 2970 2796 50  0000 L CNN
+F 1 "60k" H 2970 2705 50  0000 L CNN
+F 2 "" V 2830 2750 50  0001 C CNN
+F 3 "~" H 2900 2750 50  0001 C CNN
+	1    2900 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR05
+U 1 1 6229162B
+P 2900 3000
+F 0 "#PWR05" H 2900 2750 50  0001 C CNN
+F 1 "GND" H 2905 2827 50  0000 C CNN
+F 2 "" H 2900 3000 50  0001 C CNN
+F 3 "" H 2900 3000 50  0001 C CNN
+	1    2900 3000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 2200 2900 2100
+Wire Wire Line
+	2900 2600 2900 2550
+Wire Wire Line
+	2900 3000 2900 2900
+Connection ~ 2900 2550
+Wire Wire Line
+	2900 2550 2900 2500
+Wire Wire Line
+	2450 2550 2900 2550
+Text Label 2550 2550 0    50   ~ 0
+P4
+$Comp
+L Switch:SW_Push SW1
+U 1 1 622927E8
+P 4250 2550
+F 0 "SW1" H 4250 2835 50  0000 C CNN
+F 1 "Reset Alarm" H 4250 2744 50  0000 C CNN
+F 2 "" H 4250 2750 50  0001 C CNN
+F 3 "" H 4250 2750 50  0001 C CNN
+	1    4250 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR08
+U 1 1 6229287E
+P 4500 2750
+F 0 "#PWR08" H 4500 2500 50  0001 C CNN
+F 1 "GND" H 4505 2577 50  0000 C CNN
+F 2 "" H 4500 2750 50  0001 C CNN
+F 3 "" H 4500 2750 50  0001 C CNN
+	1    4500 2750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4500 2750 4500 2550
+Wire Wire Line
+	4500 2550 4450 2550
+Wire Wire Line
+	3700 2550 4050 2550
+Text Label 3800 2550 0    50   ~ 0
+P0
+$Comp
+L Transformer:CST1_Split T1
+U 1 1 62293309
+P 5300 1600
+F 0 "T1" H 5300 1840 50  0000 C CNN
+F 1 "Current Transformer" H 5300 1749 50  0000 C CNN
+F 2 "Transformer_SMD:Transformer_Coilcraft_CST1" H 5300 1600 50  0001 C CNN
+F 3 "https://www.coilcraft.com/pdfs/cst.pdf" H 5300 1600 50  0001 C CNN
+	1    5300 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R4
+U 1 1 6229342E
+P 5700 1250
+F 0 "R4" H 5770 1296 50  0000 L CNN
+F 1 "33k" H 5770 1205 50  0000 L CNN
+F 2 "" V 5630 1250 50  0001 C CNN
+F 3 "~" H 5700 1250 50  0001 C CNN
+	1    5700 1250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 622934A3
+P 5700 1950
+F 0 "R5" H 5770 1996 50  0000 L CNN
+F 1 "11k" H 5770 1905 50  0000 L CNN
+F 2 "" V 5630 1950 50  0001 C CNN
+F 3 "~" H 5700 1950 50  0001 C CNN
+	1    5700 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR010
+U 1 1 6229350C
+P 5700 2200
+F 0 "#PWR010" H 5700 1950 50  0001 C CNN
+F 1 "GND" H 5705 2027 50  0000 C CNN
+F 2 "" H 5700 2200 50  0001 C CNN
+F 3 "" H 5700 2200 50  0001 C CNN
+	1    5700 2200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR09
+U 1 1 62293559
+P 5700 1000
+F 0 "#PWR09" H 5700 850 50  0001 C CNN
+F 1 "+5V" H 5715 1173 50  0000 C CNN
+F 2 "" H 5700 1000 50  0001 C CNN
+F 3 "" H 5700 1000 50  0001 C CNN
+	1    5700 1000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5700 1100 5700 1000
+Wire Wire Line
+	5700 1400 5700 1600
+Wire Wire Line
+	5700 2100 5700 2200
+Wire Wire Line
+	5500 1600 5700 1600
+Connection ~ 5700 1600
+Wire Wire Line
+	5700 1600 5700 1800
+Wire Wire Line
+	4700 1600 5100 1600
+Text Label 4800 1600 0    50   ~ 0
+P2
+NoConn ~ 1750 2400
+NoConn ~ 1750 2600
+$EndSCHEMATC
